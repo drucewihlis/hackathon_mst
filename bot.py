@@ -7,15 +7,6 @@ import psycopg2
 from DataBase import DataBase
 
 bot = telebot.TeleBot("5076051066:AAFNL2uekE97ukiQS4-QxIdeau1UeSD-V-Q")
-conn = psycopg2.connect("""
-    host=rc1c-sz7li2hysj2rl3ak.mdb.yandexcloud.net
-    port=6432
-    dbname=dream_team
-    user=dream
-    password=611621team
-    target_session_attrs=read-write
-    sslmode=verify-full
-""")
 
 def SendStats(message):
     bot.send_message(message.chat.id,"you are better then 100%")
@@ -25,16 +16,17 @@ def SendInfo(message):
     bot.send_message(message.chat.id, "This is a bot of dreamteam")
 def changeData(message):
     bot.send_message(message.chat.id, "Changed to "+" "+ message.text)
-def SendButtons(message, buttonsList, ):
+def SendButtons(message, buttonsList):
     markup = telebot.types.InlineKeyboardMarkup()
     for button in buttonsList:
         markup.add(telebot.types.InlineKeyboardButton(text=button.title, callback_data=button.callback))
     bot.send_message(message.chat.id, text="Выбери вариант", reply_markup=markup)
 database = DataBase()
 parents = database.GetButtonListWithChilds()
+categories_ids = database.GetCategoriesIDs()
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    buttons = database.GetButtonsByLevel(1);
+    buttons = database.GetButtonsByLevel(1)
     SendButtons(message, buttons)
 
 
@@ -61,6 +53,10 @@ def query_handler(call):
             SendAchievements(call.message)
         elif callback[0] == "info":
             SendInfo(call.message)
+        elif callback[0] in categories_ids:
+            
+        else:
+            bot.answer_callback_query(callback_query_id=call.id, text="No information yet")
     elif callback in parents:
         buttons = database.GetChildButtons(callback[0])
         SendButtons(call.message, buttons)

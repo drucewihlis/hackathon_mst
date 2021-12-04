@@ -1,5 +1,6 @@
 
 import psycopg2
+from ClassTable import *
 
 
 class DataBase():
@@ -20,7 +21,6 @@ class DataBase():
 		try:
 			cursor, connection = self.Connect()
 			if (select != None):
-				print(select)
 				cursor.execute(select)
 				DataOut = cursor.fetchall()
 			else:
@@ -37,36 +37,115 @@ class DataBase():
 	def GreatUser(self, user_id, user_name):
 		return self.InquiryDataBase(insert = """INSERT INTO UserData  (user_id, username)  VALUES  ('{}', '{}')""".format(str(user_id), str(user_name)))
 
-	def GetAllUser(self):
-		return self.InquiryDataBase(select=self.Inquiry("*", "UserData"))
+	def GetUser(self):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "UserData"))
+		result = []
+		try:
+			for row in table:
+				result.append(User(row))
+		except:
+			return 0
+		return result
+
 
 	def GetTopic(self):
-		return self.InquiryDataBase(select=self.Inquiry("*", "Topic"))
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Topic"))
+		result = []
+		try:
+			for row in table:
+				result.append(Topic(row))
+		except:
+			return 0
+		return result
+
+	def GetOption(self, question_id):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Option WHERE question_id = {}".format(str(question_id))))
+		result = []
+		try:
+			for row in table:
+				result.append(Option(row))
+		except:
+			return 0
+		return result
+
+	def GetQuestion(self, card_id):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Question WHERE card_id = {}".format(str(card_id))))
+		result = []
+		try:
+			for row in table:
+				result.append(Question(row))
+		except:
+			return 0
+		return result
+
+	def GetCard(self, category_id):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Card WHERE category_id = {}".format(str(category_id))))
+		result = []
+		try:
+			for row in table:
+				result.append(Card(row))
+		except:
+			return 0
+		return result
+
+	def GetCategory(self, topic_id):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Category WHERE topic_id = {}".format(str(topic_id))))
+		result = []
+		try:
+			for row in table:
+				result.append(Category(row))
+		except:
+			return 0
+		return result
+
+	def GetAchievments(self):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Achievments"))
+		result = []
+		try:
+			for row in table:
+				result.append(Achievments(row))
+		except:
+			return 0
+		return result
+
+
+	def GetUserAchievments(self, user_id):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "user_achievments WHERE user_id = '{}'".format(str(user_id))))
+		result = []
+		try:
+			for row in table:
+				result.append(UserAchievments(row))
+		except:
+			return 0
+		return result
+
+	def GetButtonsByLevel(self, level):
+
+		table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE level ={} ORDER by id".format(str(level))))
+		result =[]
+		try:
+			for row in table:
+				result.append(Button(row))
+		except:
+			return 0
+		return result
 
 	def GetAllButtonsCallback(self):
 		return self.InquiryDataBase(select = self.Inquiry("callback", "buttons"))
 	def GetButtonListWithChilds(self):
 		return self.InquiryDataBase(select=self.Inquiry("callback", "buttons WHERE has_child = False"))
-	def GetButtonsByLevel(self, level):
-		table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE level ={} ORDER BY id".format(level)))
-		result =[]
-		for row in table:
-			result.append(Button(row))
-		return result
+	def GetCategoriesIDs(self):
+		return self.InquiryDataBase(select=self.Inquiry("DISTINCT category_callback", "category"))
+		return self.InquiryDataBase(select=self.Inquiry("callback", "buttons WHERE has_child = False"))
 	def GetChildButtons(self, parent_callback):
 		table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE parent_callback ='{}' ORDER BY id".format(parent_callback)))
 		result = []
-		for row in table:
-			result.append(Button(row))
+		try:
+			for row in table:
+				result.append(Button(row))
+		except:
+			return 0
 		return result
-class Button:
-	def __init__(self, row):
-		self.id=row[0]
-		self.title = row[1]
-		self.callback = row[2]
-		self.level = row[3]
-		self.parCallbackId = row[4]
-		self.parentCallback = row[5]
 
 	def __str__(self):
 		return self.title
