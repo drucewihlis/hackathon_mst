@@ -3,7 +3,17 @@
 
 import telebot
 global bot, Blocks, commands
+import psycopg2
 bot = telebot.TeleBot("5076051066:AAFNL2uekE97ukiQS4-QxIdeau1UeSD-V-Q")
+conn = psycopg2.connect("""
+    host=rc1c-sz7li2hysj2rl3ak.mdb.yandexcloud.net
+    port=6432
+    dbname=dream_team
+    user=dream
+    password=611621team
+    target_session_attrs=read-write
+    sslmode=verify-full
+""")
 class ButtonBlock:
     def __init__(self, listOfTopics, title, call):
         self.topicList = []
@@ -11,13 +21,19 @@ class ButtonBlock:
             self.topicList.append(Topic(topic, callback))
         self.title = title
         self.call = call
-    def CreateButtons(self, message):
-        markup = telebot.types.InlineKeyboardMarkup()
-        for topic in self.topicList:
-            markup.add(telebot.types.InlineKeyboardButton(text=topic.text, callback_data=topic.callback))
-        bot.send_message(message.chat.id, text="Choose module you want to learn", reply_markup=markup)
+
     def __eq__(self, other):
         return self.call==other.call
+def CreateButtons(self, message):
+    markup = telebot.types.InlineKeyboardMarkup()
+    for topic in self.topicList:
+        markup.add(telebot.types.InlineKeyboardButton(text=topic.text, callback_data=topic.callback))
+    bot.send_message(message.chat.id, text="Choose module you want to learn", reply_markup=markup)
+def GetButtonsByLevel(level):
+
+def GetButtons(call_id):
+    return True
+
 class Topic:
     def __init__(self, text, callback):
         self.text = text
@@ -49,8 +65,8 @@ def start_message(message):
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Learn', callback_data="learn"))
     markup.add(telebot.types.InlineKeyboardButton(text='Tests', callback_data="tests"))
-    markup.add(telebot.types.InlineKeyboardButton(text='Achievements', callback_data="achiev"))
-    markup.add(telebot.types.InlineKeyboardButton(text='Statistics', callback_data="stats"))
+    markup.add(telebot.types.InlineKeyboardButton(text='Achievements', callback_data="achievements"))
+    markup.add(telebot.types.InlineKeyboardButton(text='Statistics', callback_data="statistics"))
     markup.add(telebot.types.InlineKeyboardButton(text='Info', callback_data="info"))
     markup.add(telebot.types.InlineKeyboardButton(text='Change personal data', callback_data="change"))
     bot.send_message(message.chat.id, text="Choose variant", reply_markup=markup)
