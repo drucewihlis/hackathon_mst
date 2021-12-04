@@ -1,3 +1,6 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import random
 
 
@@ -10,7 +13,8 @@ def send_email(recipient):
     FROM = user
     TO = recipient
     SUBJECT = subject
-    TEXT = 'Your code ' + str(random.randint(100000, 999999))
+    code = str(random.randint(100000, 999999))
+    TEXT = 'Your code ' + code
 
     # Prepare actual message
     message = "\r\n".join([
@@ -29,3 +33,5 @@ def send_email(recipient):
     server_ssl.sendmail(FROM, TO, message)
     # server_ssl.quit()
     server_ssl.close()
+
+    return code
