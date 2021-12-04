@@ -34,15 +34,14 @@ class DataBase():
 				connection.close()
 		return DataOut
 
-	def GreatUser(self, user_id, user_name):
+	def CreateUser(self, user_id, user_name):
 		return self.InquiryDataBase(insert = """INSERT INTO UserData  (user_id, username)  VALUES  ('{}', '{}')""".format(str(user_id), str(user_name)))
 
-	def GetUser(self):
-		table = self.InquiryDataBase(select=self.Inquiry("*", "UserData"))
-		result = []
+	def GetUser(self, user_id):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "userdata WHERE user_id = '{}'").format(str(user_id)))
 		try:
-			for row in table:
-				result.append(User(row))
+
+			result = User(table[0])
 		except:
 			return 0
 		return result
