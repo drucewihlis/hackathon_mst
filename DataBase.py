@@ -78,8 +78,9 @@ class DataBase():
 			return 0
 		return result
 
-	def GetCard(self, category_id):
-		table = self.InquiryDataBase(select=self.Inquiry("*", "Card WHERE category_id = {}".format(str(category_id))))
+	def GetCards(self, category_callback):
+		print(category_callback)
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Card WHERE category_callback = '{}'".format(str(category_callback))))
 		result = []
 		try:
 			for row in table:
@@ -89,6 +90,7 @@ class DataBase():
 		return result
 
 	def GetCategory(self, topic_id):
+
 		table = self.InquiryDataBase(select=self.Inquiry("*", "Category WHERE topic_id = {}".format(str(topic_id))))
 		result = []
 		try:
@@ -135,8 +137,11 @@ class DataBase():
 	def GetButtonListWithChilds(self):
 		return self.InquiryDataBase(select=self.Inquiry("callback", "buttons WHERE has_child = False"))
 	def GetCategoriesIDs(self):
-		return self.InquiryDataBase(select=self.Inquiry("DISTINCT category_callback", "category"))
-		return self.InquiryDataBase(select=self.Inquiry("callback", "buttons WHERE has_child = False"))
+		categories =[]
+		result = self.InquiryDataBase(select=self.Inquiry("DISTINCT category_callback", "category"))
+		for r in result:
+			categories.append(r[0])
+		return categories
 	def GetChildButtons(self, parent_callback):
 		table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE parent_callback ='{}' ORDER BY id".format(parent_callback)))
 		result = []
