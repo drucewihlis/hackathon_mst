@@ -20,6 +20,7 @@ class DataBase():
 		try:
 			cursor, connection = self.Connect()
 			if (select != None):
+				print(select)
 				cursor.execute(select)
 				DataOut = cursor.fetchall()
 			else:
@@ -42,10 +43,19 @@ class DataBase():
 	def GetTopic(self):
 		return self.InquiryDataBase(select=self.Inquiry("*", "Topic"))
 
+	def GetAllButtonsCallback(self):
+		return self.InquiryDataBase(select = self.Inquiry("callback", "buttons"))
+	def GetButtonListWithChilds(self):
+		return self.InquiryDataBase(select=self.Inquiry("callback", "buttons WHERE has_child = False"))
 	def GetButtonsByLevel(self, level):
-
-		table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE level ={}".format(level)))
+		table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE level ={} ORDER BY id".format(level)))
 		result =[]
+		for row in table:
+			result.append(Button(row))
+		return result
+	def GetChildButtons(self, parent_callback):
+		table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE parent_callback ='{}' ORDER BY id".format(parent_callback)))
+		result = []
 		for row in table:
 			result.append(Button(row))
 		return result
@@ -58,9 +68,12 @@ class Button:
 		self.parCallbackId = row[4]
 		self.parentCallback = row[5]
 
+	def __str__(self):
+		return self.title
 # DataBase = DataBase()
-# print(DataBase.GreatUser('test', 'test'))
-#
-# print(DataBase.GetAllUser())
-# print(DataBase.GetTopic())
-# print(DataBase.GetButtonsByLevel(1))
+# # print(DataBase.GreatUser('test', 'test'))
+# #
+# # print(DataBase.GetAllUser())
+# # print(DataBase.GetAllButtonsCallback())
+# for b in DataBase.GetButtonListWithChilds():
+# 	print(b[0])
