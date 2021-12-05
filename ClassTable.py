@@ -46,6 +46,9 @@ class Option:
 		self.question_id = row[1]
 		self.name_option = row[2]
 		self.info = row[3]
+		self.correct=row[4]
+	def __eq__ (self, other):
+		return self.id==other.id
 
 
 class Question:

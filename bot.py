@@ -9,6 +9,13 @@ from DataBase import DataBase
 
 bot = telebot.TeleBot("5076051066:AAFNL2uekE97ukiQS4-QxIdeau1UeSD-V-Q")
 user_data = {}
+class UserData:
+    def __init__(self):
+        self.card_list=[]
+        self.qustion_list=[]
+        self.current_question=0
+        self.current_options=[]
+        self.right_option=0
 
 
 def SendReg(message):
@@ -63,19 +70,58 @@ def SendCard(message, card):
     msg = bot.send_message(message.chat.id, 'Следующая карточка?',
                            reply_markup=markup)
     bot.register_next_step_handler(msg, nextcard)
+def SendQuestion(msg, question):
+    options = database.GetOptionsByQuestionId(question.id)
+    # print(options)
+    rightanswer = RightAnswer(options)
+    user_data[str(msg.chat.id)].current_options = options
+    user_data[str(msg.chat.id)].right_option = rightanswer
+    markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    for option in options:
+        markup.add(telebot.types.KeyboardButton(option.info))
+    msg = bot.send_message(msg.chat.id, text=user_data[str(msg.chat.id)].current_question.info, reply_markup=markup)
+    bot.register_next_step_handler(msg, nextquestion)
 
+def RightAnswer(options):
+    for option in options:
+        if option.correct:
+            return option
+def nextquestion(msg):
+    print(user_data[str(msg.chat.id)].right_option.info)
+    print(msg.text)
+    if msg.text == user_data[str(msg.chat.id)].right_option.info:
+        bot.send_message(msg.chat.id, "Верно!")
 
-def nextcard(msg):
-    if len(user_data[str(msg.chat.id)]) > 0:
-        if msg.text == "Да":
-            SendCard(msg, user_data[str(msg.chat.id)].pop(0))
     else:
-
-        bot.send_message(msg.chat.id, "Все карточки пройдены!",reply_markup = telebot.types.ReplyKeyboardRemove())
+        bot.send_message(msg.chat.id, "Не верно!", reply_markup = telebot.types.ReplyKeyboardRemove())
+    if len(user_data[str(msg.chat.id)].questions) > 0:
+        SendQuestion(msg, user_data[str(msg.chat.id)].questions.pop(0))
+    else:
+        bot.send_message(msg.chat.id, "Вы ответили на все вопросы")
         buttons = database.GetButtonsByLevel(1)
         SendButtons(msg, buttons)
 
+def nextcard(msg):
+    if len(user_data[str(msg.chat.id)].cards) > 0:
+        if msg.text == "Да":
+            SendCard(msg, user_data[str(msg.chat.id)].cards.pop(0))
+    else:
+        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+        markup.add(telebot.types.KeyboardButton('Да'))
+        markup.add(telebot.types.KeyboardButton('Нет'))
+        bot.send_message(msg.chat.id, "Все карточки пройдены!")
+        if len(user_data[str(msg.chat.id)].questions)>0:
+            msg = bot.send_message(msg.chat.id, text = "Пройти тест?",reply_markup = markup)
+            bot.register_next_step_handler(msg, StartQuestions)
 
+def StartQuestions(msg):
+    if msg.text=="Да":
+        question = user_data[str(msg.chat.id)].questions.pop(0)
+        user_data[str(msg.chat.id)].current_question = question
+        SendQuestion(msg, question)
+    elif msg.text=="Нет":
+        buttons = database.GetButtonsByLevel(1)
+        SendButtons(msg, buttons)
 database = DataBase()
 parents = database.GetButtonListWithChilds()
 categories_ids = database.GetCategoriesIDs()
@@ -124,11 +170,17 @@ def query_handler(call):
             SendInfo(call.message)
 
         elif callback[0] in categories_ids:
+            cards = database.GetCardsByCallback(callback[0])
 
-            cards = database.GetCards(callback[0])
-            user_data[str(call.message.chat.id)] = cards
-            if len(user_data[str(call.message.chat.id)]) > 0:
-                SendCard(call.message, user_data[str(call.message.chat.id)].pop(0))
+            user_data[str(call.message.chat.id)] = UserData()
+            user_data[str(call.message.chat.id)].cards=cards.copy()
+            if len(cards)>0:
+                questions = database.GetQuestionByCardId(cards).copy()
+                user_data[str(call.message.chat.id)].questions = questions.copy()
+            else:
+                bot.answer_callback_query(callback_query_id=call.id, text="No information yet")
+            if len(user_data[str(call.message.chat.id)].cards) > 0:
+                SendCard(call.message, user_data[str(call.message.chat.id)].cards.pop(0))
 
         elif callback[0] == "reg":
             msg = bot.send_message(call.message.chat.id, "Введите Вашу почту")

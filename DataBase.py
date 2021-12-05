@@ -21,6 +21,7 @@ class DataBase():
 		try:
 			cursor, connection = self.Connect()
 			if (select != None):
+				# print(select)
 				cursor.execute(select)
 				DataOut = cursor.fetchall()
 			else:
@@ -67,7 +68,34 @@ class DataBase():
 			return 0
 		return result
 
-	def GetQuestion(self, card_id):
+	def GetQuestionByCardId(self, card_id):
+		card_list = str(card_id.pop(0).id)
+		for u in card_id:
+			card_list = card_list + ", " + str(u.id)
+
+		table = self.InquiryDataBase(select=self.Inquiry("*", "Question WHERE card_id in ({})".format(str(card_list))))
+		result = []
+		try:
+			for row in table:
+				result.append(Question(row))
+		except:
+			return 0
+		return result
+	def GetOptionsByQuestionId(self, question_id):
+		#print(question_id)
+		table = self.InquiryDataBase(select=self.Inquiry("*", "option WHERE question_id = {}".format(str(question_id))))
+		# print(table)
+		result = []
+		try:
+			for row in table:
+				# print(row)
+				result.append(Option(row))
+		except:
+			return 0
+		return result
+
+
+	def GetQuestionsByCategory(self, card_id):
 		table = self.InquiryDataBase(select=self.Inquiry("*", "Question WHERE card_id = {}".format(str(card_id))))
 		result = []
 		try:
@@ -76,9 +104,7 @@ class DataBase():
 		except:
 			return 0
 		return result
-
-	def GetCards(self, category_callback):
-		print(category_callback)
+	def GetCardsByCallback(self, category_callback):
 		table = self.InquiryDataBase(select=self.Inquiry("*", "Card WHERE category_callback = '{}'".format(str(category_callback))))
 		result = []
 		try:
@@ -111,7 +137,8 @@ class DataBase():
 
 
 	def GetUserAchievments(self, user_id):
-		table = self.InquiryDataBase(select=self.Inquiry("*", "user_achievments WHERE user_id = '{}'".format(str(user_id))))
+
+		table = self.InquiryDataBase(select=self.Inquiry("*", "user_achievments WHERE user_id in [{}]".format(str(user_id))))
 		result = []
 		try:
 			for row in table:
