@@ -13,10 +13,15 @@ user_data = {}
 
 def SendReg(message):
     email = message.text
-    code = gmail.send_email(email)
-    msg = bot.send_message(message.chat.id, "Введите код выслаланный на указанный Вами email")
-    user_data[message.chat.id] = code
-    bot.register_next_step_handler(msg, CheckCode)
+    domenName = message.text.split('@')[-1]
+    if not bool(database.GetDomenByName(domenName)):
+        msg = bot.send_message(message.chat.id, "Данный email не имеет доступа к боту, введите Вашу корпоративную почту")
+        bot.register_next_step_handler(msg, SendReg)
+    else:
+        code = gmail.send_email(email)
+        msg = bot.send_message(message.chat.id, "Введите код выслаланный на указанный Вами email")
+        user_data[message.chat.id] = code
+        bot.register_next_step_handler(msg, CheckCode)
 
 
 def CheckCode(message):

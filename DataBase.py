@@ -125,7 +125,7 @@ class DataBase():
 
     def GetButtonsByLevel(self, level):
 
-        table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE level ={} ORDER by id".format(str(level))))
+        table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE level = {} ORDER by id".format(str(level))))
         result = []
         try:
             for row in table:
@@ -134,12 +134,13 @@ class DataBase():
             return 0
         return result
 
-    def GetDomens(self):
-        table = self.InquiryDataBase(select=self.Inquiry("*", "domens"))
+    def GetDomenByName(self, name):
+        table = self.InquiryDataBase(select=self.Inquiry("*", "domens WHERE name = '{}'".format(str(name))))
         result = []
+
         try:
             for row in table:
-                result.append(domens(row))
+                result.append(Domen(row))
         except:
             return 0
         return result
