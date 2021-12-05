@@ -9,6 +9,7 @@ from DataBase import DataBase
 
 bot = telebot.TeleBot("5076051066:AAFNL2uekE97ukiQS4-QxIdeau1UeSD-V-Q")
 user_data = {}
+achiv_img_path = 'img/achievments/'
 
 
 def SendReg(message):
@@ -36,12 +37,15 @@ def CheckCode(message):
 
 
 def SendStats(message):
-    bot.send_message(message.chat.id, "you are better then 100%")
+    bot.send_message(message.chat.id, "Вы готовы к атакам киберпреступников лучше чем 100% пользователей")
 
 
 def SendAchievements(message):
-    print(message)
-    bot.send_message(message.chat.id, "You've got level 5")
+    achievments = database.GetAchievmentsByUserId(message.chat.id)
+    for achiv in achievments:
+        sti = open(achiv_img_path + achiv.img, 'rb')
+        bot.send_sticker(message.chat.id, sti)
+        bot.send_message(message.chat.id, achiv.title + ' - ' + achiv.info)
 
 
 def SendInfo(message):

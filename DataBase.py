@@ -112,6 +112,19 @@ class DataBase():
             return 0
         return result
 
+    def GetAchievmentsByUserId(self, user_id):
+        table = self.InquiryDataBase(select=self.Inquiry("a.id, a.title, a.img, a.info", "user_achievments as "
+                                                                                         "u RIGHT JOIN achievments AS a  "
+                                                                                         "ON  u.user_id = {}  "
+                                                                                         "AND a.id = u.achievment_id".format(str(user_id))))
+        result = []
+        try:
+            for row in table:
+                result.append(Achievments(row))
+        except:
+            return 0
+        return result
+
     def GetUserAchievments(self, user_id):
         table = self.InquiryDataBase(
             select=self.Inquiry("*", "user_achievments WHERE user_id = '{}'".format(str(user_id))))
@@ -125,7 +138,8 @@ class DataBase():
 
     def GetButtonsByLevel(self, level):
 
-        table = self.InquiryDataBase(select=self.Inquiry("*", "buttons WHERE level = {} ORDER by id".format(str(level))))
+        table = self.InquiryDataBase(
+            select=self.Inquiry("*", "buttons WHERE level = {} ORDER by id".format(str(level))))
         result = []
         try:
             for row in table:
@@ -171,8 +185,6 @@ class DataBase():
 
     def __str__(self):
         return self.title
-
-
 
 # DataBase = DataBase()
 # # print(DataBase.GreatUser('test', 'test'))
