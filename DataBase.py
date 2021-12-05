@@ -3,6 +3,7 @@ from ClassTable import *
 
 
 class DataBase():
+
     def __init__(self):
         pass
 
@@ -34,17 +35,16 @@ class DataBase():
                 connection.close()
         return DataOut
 
-    def GreatUser(self, user_id, user_name):
+    def CreateUser(self, user_id, user_name):
         return self.InquiryDataBase(
             insert="""INSERT INTO UserData  (user_id, username)  VALUES  ('{}', '{}')""".format(str(user_id),
                                                                                                 str(user_name)))
 
-    def GetUser(self):
-        table = self.InquiryDataBase(select=self.Inquiry("*", "UserData"))
-        result = []
+    def GetUser(self, user_id):
+        table = self.InquiryDataBase(select=self.Inquiry("*", "userdata WHERE user_id = '{}'").format(str(user_id)))
         try:
-            for row in table:
-                result.append(User(row))
+
+            result = User(table[0])
         except:
             return 0
         return result
@@ -79,8 +79,10 @@ class DataBase():
             return 0
         return result
 
-    def GetCard(self, category_id):
-        table = self.InquiryDataBase(select=self.Inquiry("*", "Card WHERE category_id = {}".format(str(category_id))))
+    def GetCards(self, category_callback):
+        print(category_callback)
+        table = self.InquiryDataBase(
+            select=self.Inquiry("*", "Card WHERE category_callback = '{}'".format(str(category_callback))))
         result = []
         try:
             for row in table:
@@ -90,6 +92,7 @@ class DataBase():
         return result
 
     def GetCategory(self, topic_id):
+
         table = self.InquiryDataBase(select=self.Inquiry("*", "Category WHERE topic_id = {}".format(str(topic_id))))
         result = []
         try:
@@ -148,8 +151,11 @@ class DataBase():
         return self.InquiryDataBase(select=self.Inquiry("callback", "buttons WHERE has_child = False"))
 
     def GetCategoriesIDs(self):
-        return self.InquiryDataBase(select=self.Inquiry("DISTINCT category_callback", "category"))
-        return self.InquiryDataBase(select=self.Inquiry("callback", "buttons WHERE has_child = False"))
+        categories = []
+        result = self.InquiryDataBase(select=self.Inquiry("DISTINCT category_callback", "category"))
+        for r in result:
+            categories.append(r[0])
+        return categories
 
     def GetChildButtons(self, parent_callback):
         table = self.InquiryDataBase(
@@ -164,6 +170,9 @@ class DataBase():
 
     def __str__(self):
         return self.title
+
+
+
 # DataBase = DataBase()
 # # print(DataBase.GreatUser('test', 'test'))
 # #
