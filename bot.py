@@ -49,7 +49,7 @@ def SendAchievements(message):
 
 
 def SendInfo(message):
-    bot.send_message(message.chat.id, "Чат-бот комманды dreamteam")
+    bot.send_message(message.chat.id, "Чат-бот команды dreamteam")
 
 
 def changeData(message):
