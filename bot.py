@@ -9,6 +9,7 @@ from DataBase import DataBase
 
 bot = telebot.TeleBot("5076051066:AAFNL2uekE97ukiQS4-QxIdeau1UeSD-V-Q")
 user_data = {}
+
 class UserData:
     def __init__(self):
         self.card_list=[]
@@ -17,13 +18,20 @@ class UserData:
         self.current_options=[]
         self.right_option=0
 
+achiv_img_path = 'img/achievments/'
+
 
 def SendReg(message):
     email = message.text
-    code = gmail.send_email(email)
-    msg = bot.send_message(message.chat.id, "Введите код выслаланный на указанный Вами email")
-    user_data[message.chat.id] = code
-    bot.register_next_step_handler(msg, CheckCode)
+    domenName = message.text.split('@')[-1]
+    if not bool(database.GetDomenByName(domenName)):
+        msg = bot.send_message(message.chat.id, "Данный email не имеет доступа к боту, введите Вашу корпоративную почту")
+        bot.register_next_step_handler(msg, SendReg)
+    else:
+        code = gmail.send_email(email)
+        msg = bot.send_message(message.chat.id, "Введите код выслаланный на указанный Вами email")
+        user_data[message.chat.id] = code
+        bot.register_next_step_handler(msg, CheckCode)
 
 
 def CheckCode(message):
@@ -38,16 +46,19 @@ def CheckCode(message):
 
 
 def SendStats(message):
-    bot.send_message(message.chat.id, "you are better then 100%")
+    bot.send_message(message.chat.id, "Вы готовы к атакам киберпреступников лучше чем 100% пользователей")
 
 
 def SendAchievements(message):
-    print(message)
-    bot.send_message(message.chat.id, "You've got level 5")
+    achievments = database.GetAchievmentsByUserId(message.chat.id)
+    for achiv in achievments:
+        sti = open(achiv_img_path + achiv.img, 'rb')
+        bot.send_sticker(message.chat.id, sti)
+        bot.send_message(message.chat.id, achiv.title + ' - ' + achiv.info)
 
 
 def SendInfo(message):
-    bot.send_message(message.chat.id, "Чат-бот комманды dreamteam")
+    bot.send_message(message.chat.id, "Чат-бот команды dreamteam")
 
 
 def changeData(message):
